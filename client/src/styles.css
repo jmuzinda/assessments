@@ -1,0 +1,139 @@
+:root {
+  color: #1c1915;
+  background: #efe7d8;
+  font-family: "Public Sans", "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  --ink: #1c1915;
+  --muted: #655e55;
+  --line: #d9cfbf;
+  --panel: #fffaf2;
+  --accent: #9a3412;
+  --accent-ink: #fff7ed;
+  --ok: #3f6212;
+  --warn: #92400e;
+  --bad: #9f1239;
+  --shadow: 0 12px 30px rgb(28 25 21 / 6%);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+
+.auth-screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+}
+.auth-panel, .panel, .shell-nav, .ticket {
+  background: var(--panel);
+}
+.auth-panel { padding: 48px 40px; }
+.auth-aside {
+  padding: 64px;
+  background:
+    linear-gradient(160deg, rgb(28 25 21 / 8%), transparent 40%),
+    #c4b49a;
+}
+.wordmark, .shell-nav strong {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+}
+.lede { color: var(--muted); max-width: 36ch; }
+h1, h2 { font-family: Fraunces, Georgia, serif; letter-spacing: -0.03em; font-weight: 560; }
+h1 { margin: 12px 0 8px; font-size: 40px; }
+h2 { margin: 0 0 12px; font-size: 28px; }
+
+.shell { min-height: 100vh; display: grid; grid-template-columns: 220px 1fr; }
+.shell-nav {
+  padding: 24px 16px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.shell-nav nav { display: grid; gap: 4px; }
+.shell-nav a, .text-button {
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+.shell-nav a[aria-current="page"] { background: #1c1915; color: #fffaf2; }
+.shell-main { padding: 28px 32px 64px; }
+.identity { margin-top: auto; color: var(--muted); font-size: 14px; }
+.identity button, .text-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.stack { display: grid; gap: 12px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+label { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+input, select, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+textarea { min-height: 88px; resize: vertical; }
+button.primary, button.quiet {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+button.primary { background: var(--accent); color: var(--accent-ink); }
+button.quiet { background: #efe7d8; }
+button:disabled { opacity: 0.55; cursor: wait; }
+
+.banner {
+  background: #fff1f2;
+  color: var(--bad);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0 24px; }
+.metric, .ticket, .panel { border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+.metric { background: var(--panel); padding: 14px 16px; }
+.metric span { display: block; color: var(--muted); font-size: 13px; }
+.metric strong { font-family: Fraunces, Georgia, serif; font-size: 28px; }
+.tickets { display: grid; gap: 10px; }
+.ticket {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+.ticket small, .muted { color: var(--muted); }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: #efe7d8;
+  font-size: 13px;
+  text-transform: lowercase;
+}
+.pill.urgent, .pill.overdue { background: #ffe4e6; color: var(--bad); }
+.pill.high { background: #ffedd5; color: var(--warn); }
+.pill.completed, .pill.paid { background: #ecfccb; color: var(--ok); }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.panel { padding: 16px; }
+.split { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 16px; align-items: start; }
+.empty { color: var(--muted); padding: 24px 0; }
+
+@media (max-width: 860px) {
+  .auth-screen, .shell, .split, .grid-2, .metrics { grid-template-columns: 1fr; }
+  .auth-aside { display: none; }
+  .shell-nav { border-right: 0; border-bottom: 1px solid var(--line); }
+  .ticket { grid-template-columns: 1fr; }
+}

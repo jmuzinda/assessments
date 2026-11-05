@@ -1,0 +1,23 @@
+{
+  "name": "helio-ops",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multi-tenant field service operations API for scheduling, dispatch, inventory, and billing.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node scripts/start.cjs",
+    "seed": "tsx src/scripts/seed.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.6.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2"
+  }
+}
