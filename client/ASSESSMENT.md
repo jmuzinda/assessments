@@ -29,19 +29,3 @@ Fields: `From`, `To`, `Part`, `Quantity`. Submit calls:
 ```
 
 After a success response, show the returned `referenceId` and reload the on-hand table. A `409` stays on the form as the API message. Viewers do not see the form.
-
-## 3. Refund a payment
-
-On an invoice whose status is `paid` or `partial`, someone with `billing:write` sees fields `Refund cents` and `Refund reference`, and a button `Record refund`.
-
-Submit calls `POST /api/v1/invoices/:id/refunds` with `{ "amountCents": 1000, "reference": "credit-memo" }`.
-
-Render each returned refund with its reference. Draft, issued, and void invoices do not show the form. A viewer does not see it either.
-
-## 4. Webhook subscriptions
-
-Add a screen at `/settings/webhooks`, linked from the sidebar for `members:write` only. Heading: `Webhook subscriptions`.
-
-The form fields are `Endpoint`, one checkbox per event name you support (include `customer.created`), and `Signing secret`. Submit calls `POST /api/v1/webhooks`.
-
-Show the secret from the create response once. `GET /api/v1/webhooks` must not be asked to reveal it, and the list after refresh shows the URL and events only. Each row can delete with `DELETE /api/v1/webhooks/:id`.
