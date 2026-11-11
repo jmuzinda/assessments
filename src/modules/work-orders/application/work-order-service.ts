@@ -17,6 +17,7 @@ import { assertWorkOrderCapacity } from '../../tenancy/domain/plan-policy';
 import type { TechnicianStore } from '../../workforce/application/ports';
 import type { TechnicianProfile } from '../../workforce/domain/types';
 import { assertScheduleWindow } from '../domain/schedule-policy';
+import { countSkillMatches, suggestionScore, type TechnicianSuggestion } from '../domain/suggestions';
 import { slaDueAt } from '../domain/sla';
 import { assertTransition } from '../domain/state-machine';
 import type { Priority, TimeEntry, WorkOrder, WorkOrderNote, WorkOrderStatus } from '../domain/types';
@@ -193,6 +194,59 @@ export class WorkOrderService {
       });
       return next;
     });
+  }
+
+  suggest(principal: Principal, id: string): TechnicianSuggestion[] {
+    assertRole(principal.role, 'work_orders:dispatch');
+    const workOrder = this.workOrders.findById(principal.organizationId, id);
+    if (!workOrder) {
+      throw Errors.notFound('Work order');
+    }
+    if (!workOrder.scheduledStart || !workOrder.scheduledEnd) {
+      throw Errors.invalidState('Work order must have a schedule window');
+    }
+    const category = workOrder.assetId
+      ? this.customers.findAsset(principal.organizationId, workOrder.assetId)?.category ?? null
+      : null;
+    const suggestions: TechnicianSuggestion[] = [];
+    for (const person of this.technicians.list(principal.organizationId)) {
+      if (!person.active) {
+        continue;
+      }
+      const overlap = this.workOrders.hasTechnicianOverlap({
+        organizationId: principal.organizationId,
+        technicianId: person.id,
+        start: workOrder.scheduledStart,
+        end: workOrder.scheduledEnd,
+        excludingWorkOrderId: workOrder.id,
+      });
+      if (overlap) {
+        continue;
+      }
+      const skillMatch = countSkillMatches(person.skills, category);
+      const openAssignments = this.workOrders.countOpenAssignments(principal.organizationId, person.id);
+      suggestions.push({
+        technicianId: person.id,
+        userId: person.userId,
+        name: person.name,
+        email: person.email,
+        skills: person.skills,
+        hourlyRateCents: person.hourlyRateCents,
+        skillMatch,
+        openAssignments,
+        score: suggestionScore(skillMatch, openAssignments),
+      });
+    }
+    suggestions.sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+      if (left.hourlyRateCents !== right.hourlyRateCents) {
+        return left.hourlyRateCents - right.hourlyRateCents;
+      }
+      return left.name.localeCompare(right.name);
+    });
+    return suggestions;
   }
 
   start(principal: Principal, id: string, expectedVersion: number): WorkOrder {
