@@ -163,6 +163,60 @@ export class InventoryService {
     });
   }
 
+  transfer(
+    principal: Principal,
+    input: { partId: string; fromLocationId: string; toLocationId: string; quantity: number },
+  ): { referenceId: string; partId: string; fromLocationId: string; toLocationId: string; quantity: number } {
+    assertPositiveInt(input.quantity, 'quantity');
+    if (input.fromLocationId === input.toLocationId) {
+      throw Errors.conflict('Source and destination must be different locations');
+    }
+    return this.unitOfWork.run(() => {
+      const part = this.requirePart(principal.organizationId, input.partId);
+      this.requireLocation(principal.organizationId, input.fromLocationId);
+      this.requireLocation(principal.organizationId, input.toLocationId);
+      const source = this.levelOrZero(principal.organizationId, part.id, input.fromLocationId);
+      let nextSource: StockLevel;
+      try {
+        nextSource = applyTransfer(source, input.quantity);
+      } catch (error) {
+        if (error instanceof AppError && error.code === 'INSUFFICIENT_STOCK') {
+          throw Errors.insufficientStock(part.sku, availableQuantity(source), input.quantity);
+        }
+        throw error;
+      }
+      const destination = this.levelOrZero(principal.organizationId, part.id, input.toLocationId);
+      const nextDestination = { ...destination, onHand: destination.onHand + input.quantity };
+      this.inventory.saveLevel(nextSource);
+      this.inventory.saveLevel(nextDestination);
+      const referenceId = this.ids.next();
+      this.movement(principal, part.id, input.fromLocationId, 'transfer', -input.quantity, 'stock_transfer', referenceId);
+      this.movement(principal, part.id, input.toLocationId, 'transfer', input.quantity, 'stock_transfer', referenceId);
+      this.activity.record({
+        organizationId: principal.organizationId,
+        actorId: principal.userId,
+        action: 'inventory.transferred',
+        entityType: 'stock_transfer',
+        entityId: referenceId,
+        metadata: {
+          partId: part.id,
+          sku: part.sku,
+          fromLocationId: input.fromLocationId,
+          toLocationId: input.toLocationId,
+          quantity: input.quantity,
+          referenceId,
+        },
+      });
+      return {
+        referenceId,
+        partId: part.id,
+        fromLocationId: input.fromLocationId,
+        toLocationId: input.toLocationId,
+        quantity: input.quantity,
+      };
+    });
+  }
+
   release(principal: Principal, reservationId: string): StockReservation {
     return this.unitOfWork.run(() => this.releaseReservation(principal, reservationId));
   }
