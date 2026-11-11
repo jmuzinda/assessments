@@ -6,6 +6,14 @@ import { can } from '../permissions';
 import { useSession } from '../session';
 import type { Part, StockLocation, Technician, WorkOrder } from '../types';
 
+interface TechnicianSuggestion {
+  technicianId: string;
+  name: string;
+  score: number;
+  skillMatch: number;
+  openAssignments: number;
+}
+
 export function WorkOrderPage() {
   const { id = '' } = useParams();
   const { token, principal } = useSession();
@@ -24,6 +32,7 @@ export function WorkOrderPage() {
   const [partId, setPartId] = useState('');
   const [locationId, setLocationId] = useState('');
   const [quantity, setQuantity] = useState('1');
+  const [suggestions, setSuggestions] = useState<TechnicianSuggestion[] | null>(null);
 
   async function load() {
     const body = await api<{ data: WorkOrder }>(`/api/v1/work-orders/${id}`, { token });
@@ -45,6 +54,16 @@ export function WorkOrderPage() {
   useEffect(() => {
     void load().catch((cause: unknown) => setError(errorMessage(cause)));
   }, [id, token, principal]);
+
+  async function suggest() {
+    setError('');
+    try {
+      const body = await api<{ data: TechnicianSuggestion[] }>(`/api/v1/work-orders/${id}/suggestions`, { token });
+      setSuggestions(body.data);
+    } catch (cause) {
+      setError(errorMessage(cause));
+    }
+  }
 
   async function run(path: string, body: unknown) {
     setError('');
@@ -141,6 +160,21 @@ export function WorkOrderPage() {
               </select>
             </label>
             <button className="primary" type="submit">Assign</button>
+            <button className="quiet" type="button" onClick={() => void suggest()}>Suggest technicians</button>
+            {suggestions ? (
+              suggestions.length === 0 ? (
+                <p>No technicians are available for this window.</p>
+              ) : (
+                suggestions.map((person) => (
+                  <p key={person.technicianId}>
+                    {person.name} · score {person.score} · skill match {person.skillMatch} · open assignments {person.openAssignments}{' '}
+                    <button className="quiet" type="button" onClick={() => setTechnicianId(person.technicianId)}>
+                      Use {person.name}
+                    </button>
+                  </p>
+                ))
+              )
+            ) : null}
           </form>
         ) : null}
         {execute && order.status === 'dispatched' ? (
