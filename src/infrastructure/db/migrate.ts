@@ -1,10 +1,12 @@
 import type { Db } from './connection';
 import { migration001 } from './migrations/001_init';
 import { migration002 } from './migrations/002_audit_index';
+import { migration003 } from './migrations/003_stock_transfer';
 
 const migrations = [
   { id: '001_init', sql: migration001 },
   { id: '002_audit_index', sql: migration002 },
+  { id: '003_stock_transfer', sql: migration003 },
   // Candidate tasks add 003 and later here. See ASSESSMENT.md.
 ];
 
