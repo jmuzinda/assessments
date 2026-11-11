@@ -157,6 +157,18 @@ export class WorkOrderRepository implements WorkOrderStore {
     return queryOne(this.db, sql, params) !== undefined;
   }
 
+  countOpenAssignments(organizationId: string, technicianId: string): number {
+    const row = queryOne(
+      this.db,
+      `SELECT COUNT(*) AS total FROM work_orders
+       WHERE organization_id = ?
+         AND technician_id = ?
+         AND status IN ('scheduled', 'dispatched', 'in_progress')`,
+      [organizationId, technicianId],
+    );
+    return row ? readNumber(row, 'total') : 0;
+  }
+
   insertNote(note: WorkOrderNote): void {
     this.db
       .prepare(
