@@ -54,6 +54,12 @@ export async function registerWorkOrderRoutes(app: FastifyInstance): Promise<voi
     return reply.send({ data: presentWorkOrderDetail(app.container.workOrders.get(principal, params.id)) });
   });
 
+  app.get('/api/v1/work-orders/:id/suggestions', { preHandler: requireAuth }, async (request, reply) => {
+    const principal = requirePermission(request, 'work_orders:dispatch');
+    const params = parse(idParams, request.params);
+    return reply.send({ data: app.container.workOrders.suggest(principal, params.id) });
+  });
+
   app.post('/api/v1/work-orders/:id/schedule', { preHandler: requireAuth }, async (request, reply) => {
     requirePermission(request, 'work_orders:dispatch');
     const params = parse(idParams, request.params);
