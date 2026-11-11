@@ -124,6 +124,13 @@ export const receiveSchema = z.object({
   quantity: z.number().int().positive(),
 });
 
+export const transferSchema = z.object({
+  partId: uuid,
+  fromLocationId: uuid,
+  toLocationId: uuid,
+  quantity: z.number().int().positive(),
+});
+
 export const adjustSchema = z.object({
   partId: uuid,
   locationId: uuid,
