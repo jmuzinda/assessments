@@ -20,6 +20,7 @@ import {
   paymentSchema,
   receiveSchema,
   reservationQuerySchema,
+  transferSchema,
   reserveSchema,
 } from '../validation/schemas';
 import { command } from './command';
@@ -58,6 +59,12 @@ export async function registerInventoryRoutes(app: FastifyInstance): Promise<voi
     requirePermission(request, 'inventory:write');
     const body = parse(receiveSchema, request.body);
     return command(request, reply, 200, body, () => presentLevel(app.container.inventory.receive(request.principal!, body)));
+  });
+
+  app.post('/api/v1/stock/transfers', { preHandler: requireAuth }, async (request, reply) => {
+    requirePermission(request, 'inventory:write');
+    const body = parse(transferSchema, request.body);
+    return command(request, reply, 200, body, () => app.container.inventory.transfer(request.principal!, body));
   });
 
   app.post('/api/v1/stock/adjust', { preHandler: requireAuth }, async (request, reply) => {
