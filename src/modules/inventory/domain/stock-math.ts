@@ -53,3 +53,14 @@ export function applyConsume(level: StockLevel, quantity: number): StockLevel {
   }
   return { ...level, onHand: level.onHand - quantity };
 }
+
+export function applyTransfer(level: StockLevel, quantity: number): StockLevel {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw Errors.validation('quantity must be a positive integer');
+  }
+  const available = availableQuantity(level);
+  if (quantity > available) {
+    throw Errors.insufficientStock('part', available, quantity);
+  }
+  return { ...level, onHand: level.onHand - quantity };
+}
