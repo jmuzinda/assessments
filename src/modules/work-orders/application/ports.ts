@@ -13,6 +13,7 @@ export interface WorkOrderStore {
     end: Date;
     excludingWorkOrderId?: string;
   }): boolean;
+  countOpenAssignments(organizationId: string, technicianId: string): number;
   insertNote(note: WorkOrderNote): void;
   listNotes(organizationId: string, workOrderId: string): WorkOrderNote[];
   insertTimeEntry(entry: TimeEntry): void;
