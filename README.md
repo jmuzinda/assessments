@@ -89,6 +89,22 @@ src/modules/*/domain          pure rules and state machines
 src/modules/*/application     use cases and repository ports
 src/modules/*/infrastructure  SQLite adapters
 src/http                      routes, auth, validation, presenters
+
+## Assessment Instructions
+Application was developed and tested on Node24
+
+## How to run the application 
+Branch used: main
+
+After cloning the project and ensuring that active branch is main cd into the assessment directory
+Run the following commands
+npm install
+npm install --prefix client
+
+Then run the API and the console in two terminals
+npx tsx src/main.tx
+npm run dev --prefix client
+
 src/infrastructure            transactions, idempotency, migrations
 ```
 
